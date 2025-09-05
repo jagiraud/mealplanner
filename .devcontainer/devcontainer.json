@@ -1,0 +1,36 @@
+{
+  "name": "Meal Planner Dev Environment",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-eslint",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-vscode.azure-account",
+        "ms-azuretools.vscode-bicep"
+      ],
+      "settings": {
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "eslint.workingDirectories": ["packages/frontend", "packages/backend", "packages/shared"]
+      }
+    }
+  },
+  
+  "forwardPorts": [3000, 7071, 5432],
+  "portsAttributes": {
+    "3000": {"label": "Frontend"},
+    "7071": {"label": "Azure Functions"},
+    "5432": {"label": "PostgreSQL"}
+  },
+  
+  "postCreateCommand": "npm install && npm run build --workspace=packages/shared",
+  "remoteUser": "node"
+}
