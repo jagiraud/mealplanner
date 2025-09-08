@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 permissions:
   id-token: write # Required for the OIDC Login
   contents: read # Required for repo checkout
+  security-events: write # Required for CodeQL analysis
+  actions: read # Required for CodeQL analysis
 
 on:
   push:
@@ -46,6 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Security Scan
     needs: lint-and-test
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     
     steps:
     - name: Checkout repository
