@@ -9,19 +9,19 @@ on:
     inputs:
       environment:
         type: string
-        required: false
-        default: 'dev'
+        required: true
       pattern:
         type: string
         required: false
         default: '.*'
-        
+			deployments-root-directory:
+				type: string
+				required: false
   push:
     branches:
       - main
     paths:
-      - "infrastructure/**"
-
+      - 'infrastructure/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -46,7 +46,7 @@ jobs:
         id: get-bicep-deployments
         uses: climpr/get-bicep-deployments@v1
         with:
-          deployments-root-directory: bicep-deployments
+          deployments-root-directory: ${{ github.event.inputs.deployments-root-directory || 'infrastructure/**' }}
           event-name: ${{ github.event_name }}
           pattern: ${{ github.event.inputs.pattern }}
           environment: ${{ github.event.inputs.environment }}
@@ -55,7 +55,7 @@ jobs:
       deployments: ${{ steps.get-bicep-deployments.outputs.deployments }}
 
   deploy-bicep-parallel:
-    name: "[${{ matrix.Name }}][${{ matrix.Environment }}] Deploy"
+    name: '[${{ matrix.Name }}][${{ matrix.Environment }}] Deploy'
     if: "${{ needs.get-bicep-deployments.outputs.deployments != '' && needs.get-bicep-deployments.outputs.deployments != '[]' }}"
     runs-on: ubuntu-22.04
     needs:
@@ -87,4 +87,4 @@ jobs:
         uses: climpr/deploy-bicep@v1
         with:
           deployment-file-path: ${{ matrix.DeploymentFile }}
-          what-if: "false"
+          what-if: 'false'
