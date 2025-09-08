@@ -14,9 +14,9 @@ on:
         type: string
         required: false
         default: '.*'
-			deployments-root-directory:
-				type: string
-				required: false
+      deployments-root-directory:
+        type: string
+        required: false
   push:
     branches:
       - main
