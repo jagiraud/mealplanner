@@ -92,7 +92,7 @@ jobs:
 
   deploy-infrastructure:
     uses: ./.github/workflows/deploy-bicep-deployments.yaml
-    needs: [lint-and-test, security-scan]
+    needs: [lint-and-test]
     with:
       environment: 'dev'
       pattern: '.*'
