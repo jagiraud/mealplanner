@@ -92,7 +92,6 @@ jobs:
   deploy-infrastructure:
     uses: ./.github/workflows/deploy-bicep-deployments.yaml
     needs: [lint-and-test, security-scan]
-    # if: github.ref == 'refs/heads/main'
     with:
       environment: 'dev'
       pattern: '.*'
@@ -102,7 +101,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Backend
     needs: deploy-infrastructure  # Wait for infrastructure deployment first
-    if: github.ref == 'refs/heads/main'
     
     steps:
     - name: Checkout repository
