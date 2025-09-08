@@ -1,5 +1,9 @@
 name: CI/CD Pipeline
 
+permissions:
+  id-token: write # Required for the OIDC Login
+  contents: read # Required for repo checkout
+
 on:
   push:
     branches: [ main, dev/* ]

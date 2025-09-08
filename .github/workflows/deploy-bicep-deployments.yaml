@@ -1,5 +1,8 @@
 # .github/workflows/deploy-bicep-deployments.yaml
 name: Deploy Bicep deployments
+permissions:
+  id-token: write # Required for the OIDC Login
+  contents: read # Required for repo checkout
 
 on:
   workflow_call:
