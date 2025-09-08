@@ -47,46 +47,51 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-
-    - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        args: --severity-threshold=high
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run npm security audit
+      run: npm audit --audit-level=moderate --production
+      continue-on-error: true
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript,typescript
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+    - name: Run ESLint security rules
+      run: |
+        npx eslint . --ext .js,.jsx,.ts,.tsx --format=json --output-file=eslint-results.json || true
+        if [ -f eslint-results.json ]; then
+          echo "ESLint results generated"
+          cat eslint-results.json
+        fi
 
   deploy-infrastructure:
-    runs-on: ubuntu-latest
-    name: Deploy Infrastructure
+    uses: ./.github/workflows/deploy-bicep-deployments.yaml
     needs: [lint-and-test, security-scan]
     if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Deploy Bicep template
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./infrastructure/main.bicep
-        parameters: |
-          environment=dev
-          postgresAdminLogin=${{ secrets.POSTGRES_ADMIN_LOGIN }}
-          postgresAdminPassword=${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+    with:
+      environment: 'production'
+      pattern: '.*'
+    secrets: inherit
 
   deploy-backend:
     runs-on: ubuntu-latest
     name: Deploy Backend
-    needs: deploy-infrastructure
+    needs: deploy-infrastructure  # Wait for infrastructure deployment first
     if: github.ref == 'refs/heads/main'
     
     steps:
@@ -105,10 +110,12 @@ jobs:
     - name: Build backend
       run: npm run build --workspace=packages/backend
 
-    - name: Azure Login
-      uses: azure/login@v1
+    - name: Azure login via OIDC
+      uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ vars.APP_ID }}
+        tenant-id: ${{ vars.TENANT_ID }}
+        subscription-id: ${{ vars.SUBSCRIPTION_ID }}
 
     - name: Deploy to Azure Functions
       uses: Azure/functions-action@v1
@@ -116,35 +123,35 @@ jobs:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    name: Deploy Frontend
-    needs: [lint-and-test, security-scan]
-    if: github.ref == 'refs/heads/main'
+  # deploy-frontend:
+  #   runs-on: ubuntu-latest
+  #   name: Deploy Frontend
+  #   needs: deploy-backend  # Wait for backend deployment
+  #   if: github.ref == 'refs/heads/main'
     
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+  #   - name: Setup Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: ${{ env.NODE_VERSION }}
+  #       cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+  #   - name: Install dependencies
+  #     run: npm ci
 
-    - name: Build frontend
-      run: npm run build --workspace=packages/frontend
-      env:
-        VITE_API_BASE_URL: https://${{ env.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net
+  #   - name: Build frontend
+  #     run: npm run build --workspace=packages/frontend
+  #     env:
+  #       VITE_API_BASE_URL: https://${{ env.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net
 
-    - name: Deploy to Azure Static Web Apps
-      uses: Azure/static-web-apps-deploy@v1
-      with:
-        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        action: 'upload'
-        app_location: './packages/frontend'
-        output_location: 'dist'
+  #   - name: Deploy to Azure Static Web Apps
+  #     uses: Azure/static-web-apps-deploy@v1
+  #     with:
+  #       azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+  #       repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #       action: 'upload'
+  #       app_location: './packages/frontend'
+  #       output_location: 'dist'

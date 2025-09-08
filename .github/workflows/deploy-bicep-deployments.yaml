@@ -1,0 +1,87 @@
+# .github/workflows/deploy-bicep-deployments.yaml
+name: Deploy Bicep deployments
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: false
+        default: 'dev'
+      pattern:
+        type: string
+        required: false
+        default: '.*'
+        
+  push:
+    branches:
+      - main
+    paths:
+      - "infrastructure/**"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Filter which environment to deploy to
+      pattern:
+        description: Filter deployments based on regex pattern. Matches against the deployment name (Directory name)
+        required: false
+        default: .*
+
+jobs:
+  get-bicep-deployments:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read # Required for repo checkout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get Bicep Deployments
+        id: get-bicep-deployments
+        uses: climpr/get-bicep-deployments@v1
+        with:
+          deployments-root-directory: bicep-deployments
+          event-name: ${{ github.event_name }}
+          pattern: ${{ github.event.inputs.pattern }}
+          environment: ${{ github.event.inputs.environment }}
+
+    outputs:
+      deployments: ${{ steps.get-bicep-deployments.outputs.deployments }}
+
+  deploy-bicep-parallel:
+    name: "[${{ matrix.Name }}][${{ matrix.Environment }}] Deploy"
+    if: "${{ needs.get-bicep-deployments.outputs.deployments != '' && needs.get-bicep-deployments.outputs.deployments != '[]' }}"
+    runs-on: ubuntu-22.04
+    needs:
+      - get-bicep-deployments
+    strategy:
+      matrix:
+        include: ${{ fromjson(needs.get-bicep-deployments.outputs.deployments) }}
+      max-parallel: 10
+      fail-fast: false
+    environment:
+      name: ${{ matrix.Environment }}
+    permissions:
+      id-token: write # Required for the OIDC Login
+      contents: read # Required for repo checkout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.APP_ID }}
+          tenant-id: ${{ vars.TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION_ID }}
+
+      - name: Run Bicep deployments
+        id: deploy-bicep
+        uses: climpr/deploy-bicep@v1
+        with:
+          deployment-file-path: ${{ matrix.DeploymentFile }}
+          what-if: "false"
