@@ -12,7 +12,15 @@ export interface UserProfile {
 }
 
 export interface DietaryPreference {
-  type: 'vegetarian' | 'vegan' | 'keto' | 'paleo' | 'gluten-free' | 'dairy-free' | 'low-carb' | 'mediterranean';
+  type:
+    | 'vegetarian'
+    | 'vegan'
+    | 'keto'
+    | 'paleo'
+    | 'gluten-free'
+    | 'dairy-free'
+    | 'low-carb'
+    | 'mediterranean';
   strict: boolean;
 }
 

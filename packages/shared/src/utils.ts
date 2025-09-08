@@ -11,7 +11,8 @@ export const isValidEmail = (email: string): boolean => {
 // Password strength validation
 export const isValidPassword = (password: string): boolean => {
   // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   return passwordRegex.test(password);
 };
 
@@ -40,8 +41,12 @@ export const slugify = (text: string): string => {
 };
 
 // Calculate calories from macronutrients
-export const calculateCalories = (protein: number, carbs: number, fat: number): number => {
-  return (protein * 4) + (carbs * 4) + (fat * 9);
+export const calculateCalories = (
+  protein: number,
+  carbs: number,
+  fat: number
+): number => {
+  return protein * 4 + carbs * 4 + fat * 9;
 };
 
 // Safe JSON parse
