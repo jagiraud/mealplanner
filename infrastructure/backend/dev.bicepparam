@@ -1,13 +1,9 @@
-using 'br/public:avm/res/storage/storage-account:0.26.2'
+using 'main.bicep'
 
-// Required parameters
-param name = 'dmpstorage23231'
-// Non-required parameters
-param kind = 'BlobStorage'
-param skuName = 'Standard_LRS'
-
-// param environment = 'dev'
-// param location = resourceGroup().location
-// param postgresAdminLogin = ''
-// param postgresAdminPassword = ''
+param storageAccountName = 'dmpstorage23231'
+param location = 'Sweden Central'
+param tags = {
+  project: 'mealplanner'
+  owner: 'jacobg'
+}
 
