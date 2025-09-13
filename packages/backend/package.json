@@ -18,13 +18,13 @@
     "@azure/functions": "^4.5.0",
     "@azure/cosmos": "^4.0.0",
     "@mealplanner/shared": "1.0.0",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
+    "@types/bcryptjs": "^3.0.0",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.11.0",
