@@ -67,6 +67,18 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.26.2' = {
     kind: 'StorageV2'
     accessTier: 'Hot'
     allowBlobPublicAccess: false
+    publicNetworkAccess: 'Disabled'
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      ipRules: [
+        {
+          action: 'Allow'
+          value: '213.89.115.150' // Privlab home office
+        }
+      ]
+      virtualNetworkRules: []
+    }
     enableTelemetry: false
     blobServices: {
       containers: [
