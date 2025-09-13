@@ -66,7 +66,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.26.2' = {
     skuName: 'Standard_LRS'
     kind: 'StorageV2'
     accessTier: 'Hot'
-    allowBlobPublicAccess: false
+    allowBlobPublicAccess: true
     publicNetworkAccess: 'Disabled'
     networkAcls: {
       bypass: 'AzureServices'
