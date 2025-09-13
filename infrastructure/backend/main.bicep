@@ -106,6 +106,7 @@ module postgresql 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.13.1' 
     version: '15'
     availabilityZone: -1
     enableTelemetry: false
+    highAvailability: environment == 'dev' ? 'Disabled' : 'ZoneRedundant'
     tags: tags ?? {}
   }
 }
