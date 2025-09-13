@@ -1,4 +1,4 @@
-using 'main-enhanced.bicep'
+using 'main.bicep'
 
 param storageAccountName = 'dmpstorage23231'
 param location = 'Sweden Central'
