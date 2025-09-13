@@ -18,7 +18,7 @@ param tags object?
 param environment string = 'dev'
 
 @description('Base name for all resources')
-param baseName string = '${environment}-mealplanner'
+param baseName string = '${substring(environment, 0, 1)}-mealplanner'
 
 @description('PostgreSQL admin username')
 @secure()
