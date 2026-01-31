@@ -1,6 +1,7 @@
 {
   "name": "@mealplanner/shared",
   "version": "1.0.0",
+  "type": "module",
   "description": "Shared types and utilities for the meal planner application",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +9,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
