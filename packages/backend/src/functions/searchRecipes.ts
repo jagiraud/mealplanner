@@ -6,11 +6,7 @@ import {
 } from '@azure/functions';
 import { ApiResponse, Recipe } from '@mealplanner/shared/src/types';
 import { query } from '../services/db';
-import {
-  searchRecipesSchema,
-  validateInput,
-  SearchRecipesInput,
-} from '../services/validation';
+import { searchRecipesSchema, validateInput } from '../services/validation';
 
 interface RecipeSearchRow extends Record<string, unknown> {
   id: string;
@@ -40,7 +36,11 @@ export async function searchRecipes(
       // Convert query params to object
       const params: Record<string, unknown> = {};
       request.query.forEach((value, key) => {
-        if (key === 'tags' || key === 'dietaryPreferences' || key === 'excludeIngredients') {
+        if (
+          key === 'tags' ||
+          key === 'dietaryPreferences' ||
+          key === 'excludeIngredients'
+        ) {
           params[key] = value.split(',').map((v) => v.trim());
         } else if (
           key === 'maxCookingTime' ||
@@ -124,7 +124,9 @@ export async function searchRecipes(
     }
 
     if (filters.minProtein) {
-      conditions.push(`(r.macronutrients->>'proteinGrams')::numeric >= $${paramIndex}`);
+      conditions.push(
+        `(r.macronutrients->>'proteinGrams')::numeric >= $${paramIndex}`
+      );
       values.push(filters.minProtein);
       paramIndex++;
     }
@@ -166,7 +168,7 @@ export async function searchRecipes(
       ingredients: [], // Not loaded for search results for performance
       instructions: [],
       cookingTimeMinutes: row.cooking_time_minutes,
-      macronutrients: row.macronutrients as any,
+      macronutrients: row.macronutrients as Record<string, number>,
       tags: row.tags,
       imageUrl: row.image_url || undefined,
       createdBy: row.created_by,

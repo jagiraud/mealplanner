@@ -53,9 +53,7 @@ export async function getRecipe(
         jsonBody: {
           success: false,
           error: 'Invalid recipe ID format',
-          message: validation.errors.errors
-            .map((e) => e.message)
-            .join(', '),
+          message: validation.errors.errors.map((e) => e.message).join(', '),
         } as ApiResponse,
       };
     }
@@ -104,7 +102,7 @@ export async function getRecipe(
       })),
       instructions: [], // TODO: Add instructions field to schema
       cookingTimeMinutes: recipeRow.cooking_time_minutes,
-      macronutrients: recipeRow.macronutrients as any,
+      macronutrients: recipeRow.macronutrients as Record<string, number>,
       tags: recipeRow.tags,
       imageUrl: recipeRow.image_url || undefined,
       createdBy: recipeRow.created_by,

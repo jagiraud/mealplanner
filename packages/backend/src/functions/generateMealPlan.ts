@@ -4,12 +4,9 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from '@azure/functions';
-import { ApiResponse, MealPlan, Recipe } from '@mealplanner/shared/src/types';
+import { ApiResponse, MealPlan } from '@mealplanner/shared/src/types';
 import { query } from '../services/db';
-import {
-  generateMealPlanSchema,
-  validateInput,
-} from '../services/validation';
+import { generateMealPlanSchema, validateInput } from '../services/validation';
 
 interface RecipeRow extends Record<string, unknown> {
   id: string;
@@ -81,7 +78,9 @@ export async function generateMealPlan(
 
     // Exclude specific recipes
     if (params.excludeRecipes && params.excludeRecipes.length > 0) {
-      conditions.push(`r.id NOT IN (${params.excludeRecipes.map((_, i) => `$${paramIndex + i}`).join(', ')})`);
+      conditions.push(
+        `r.id NOT IN (${params.excludeRecipes.map((_, i) => `$${paramIndex + i}`).join(', ')})`
+      );
       params.excludeRecipes.forEach((id) => values.push(id));
       paramIndex += params.excludeRecipes.length;
     }
