@@ -80,3 +80,67 @@ export interface ValidationError extends ApiError {
   field: string;
   value: any;
 }
+
+// --- Epic 2: Meal Planning & Recipes ---
+
+export interface Ingredient {
+  id: string;
+  name: string;
+  category: string; // e.g. vegetable, dairy, meat, etc.
+  unit: string; // e.g. grams, ml, pieces
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  fiber?: number;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  description: string;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  cookingTimeMinutes: number;
+  macronutrients: MacronutrientGoals;
+  tags?: string[];
+  imageUrl?: string;
+  ratings?: RecipeRating[];
+  createdBy: string; // user id
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RecipeIngredient {
+  ingredientId: string;
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface RecipeRating {
+  userId: string;
+  rating: number; // 1-5
+  favorite: boolean;
+  comment?: string;
+  createdAt: Date;
+}
+
+export interface MealPlan {
+  id: string;
+  userId: string;
+  weekStart: Date;
+  days: MealPlanDay[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MealPlanDay {
+  date: Date;
+  recipes: MealPlanRecipe[];
+}
+
+export interface MealPlanRecipe {
+  recipeId: string;
+  servings: number;
+}
