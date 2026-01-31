@@ -18,13 +18,13 @@
     "postinstall": "npm run build --workspace=packages/shared"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
-    "typescript": "^5.4.0"
+    "typescript": "^5.7.3"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -35,5 +35,8 @@
     "url": "git+https://github.com/jagiraud/mealplanner.git"
   },
   "author": "Meal Planner Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "vite": "7.3.1"
+  }
 }
