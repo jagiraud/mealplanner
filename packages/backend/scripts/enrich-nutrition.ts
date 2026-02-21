@@ -11,7 +11,7 @@
 
 import { Pool } from 'pg';
 
-const LIVSMEDELSVERKET_API = 'https://dataportal.livsmedelsverket.se/api/v1';
+const LIVSMEDELSVERKET_API = 'https://dataportal.livsmedelsverket.se/livsmedel/api/v1';
 
 // --- Database setup ---
 
@@ -77,15 +77,37 @@ function matchScore(ingredientName: string, livsmedelNamn: string): number {
   return 0;
 }
 
+interface LivsmedelResponse {
+  _meta: { totalRecords: number; offset: number; limit: number; count: number };
+  livsmedel: LivsmedelItem[];
+}
+
 async function fetchAllLivsmedel(): Promise<LivsmedelItem[]> {
   console.log('Fetching all food items from Livsmedelsverket...');
-  const response = await fetch(`${LIVSMEDELSVERKET_API}/livsmedel`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch livsmedel: ${response.status} ${response.statusText}`);
+  const all: LivsmedelItem[] = [];
+  let offset = 0;
+  const limit = 100;
+
+  while (true) {
+    const response = await fetch(
+      `${LIVSMEDELSVERKET_API}/livsmedel?offset=${offset}&limit=${limit}&sprak=1`
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch livsmedel: ${response.status} ${response.statusText}`);
+    }
+    const data = (await response.json()) as LivsmedelResponse;
+    all.push(...data.livsmedel);
+    console.log(`  Fetched ${all.length}/${data._meta.totalRecords} food items...`);
+
+    if (all.length >= data._meta.totalRecords || data.livsmedel.length < limit) {
+      break;
+    }
+    offset += limit;
+    await new Promise((r) => setTimeout(r, 200));
   }
-  const data = (await response.json()) as LivsmedelItem[];
-  console.log(`Fetched ${data.length} food items`);
-  return data;
+
+  console.log(`Fetched ${all.length} food items total`);
+  return all;
 }
 
 async function fetchNutrition(nummer: number): Promise<Naringsvarde[]> {
@@ -106,18 +128,18 @@ function extractMacros(naringsvarden: Naringsvarde[]): {
   const macros: Record<string, number | undefined> = {};
 
   for (const n of naringsvarden) {
-    const abbr = n.forkortning?.toLowerCase();
-    const name = n.namn?.toLowerCase();
+    const abbr = n.forkortning;
 
-    if (abbr === 'ener' || name?.includes('energi') && n.enhet === 'kcal') {
+    // Energy in kcal (not kJ)
+    if (abbr === 'Ener' && n.enhet === 'kcal') {
       macros.calories = n.varde;
-    } else if (abbr === 'prot' || name?.includes('protein')) {
+    } else if (abbr === 'Prot') {
       macros.protein = n.varde;
-    } else if (abbr === 'kolh' || name?.includes('kolhydrat')) {
+    } else if (abbr === 'Kolh') {
       macros.carbs = n.varde;
-    } else if (abbr === 'fett' || name === 'fett') {
+    } else if (abbr === 'Fett') {
       macros.fat = n.varde;
-    } else if (abbr === 'fibe' || name?.includes('fiber')) {
+    } else if (abbr === 'Fibe') {
       macros.fiber = n.varde;
     }
   }
