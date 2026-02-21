@@ -1,63 +1,33 @@
-function App() {
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f7fafc' }}>
-      <header
-        style={{
-          backgroundColor: 'white',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <div
-          style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 16px' }}
-        >
-          <h1
-            style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              color: '#1a202c',
-            }}
-          >
-            🍽️ Meal Planner
-          </h1>
-        </div>
-      </header>
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import GrainOverlay from './components/GrainOverlay';
+import HomePage from './pages/HomePage';
+import RecipeSearchPage from './pages/RecipeSearchPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
+import MealPlanPage from './pages/MealPlanPage';
+import CookbookPage from './pages/CookbookPage';
+import ProfilePage from './pages/ProfilePage';
+import FavouritesPage from './pages/FavouritesPage';
+import SettingsPage from './pages/SettingsPage';
 
-      <main>
-        <div
-          style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 16px' }}
-        >
-          <div style={{ padding: '24px 0' }}>
-            <div
-              style={{
-                border: '4px dashed #e2e8f0',
-                borderRadius: '8px',
-                height: '384px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <h2
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    color: '#374151',
-                    marginBottom: '16px',
-                  }}
-                >
-                  Welcome to Meal Planner!
-                </h2>
-                <p style={{ color: '#6b7280' }}>
-                  Your personalized meal planning journey starts here.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+export default function App() {
+  return (
+    <>
+      <GrainOverlay />
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="recipes" element={<RecipeSearchPage />} />
+            <Route path="recipes/:id" element={<RecipeDetailPage />} />
+            <Route path="meal-plan" element={<MealPlanPage />} />
+            <Route path="cookbook" element={<CookbookPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="favourites" element={<FavouritesPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
-
-export default App;

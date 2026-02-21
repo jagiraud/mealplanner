@@ -1,14 +1,48 @@
-/* Tailwind CSS styles */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Reenie+Beanie&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-cursive: 'Reenie Beanie', cursive;
+
+  /* Pine needle — primary accent */
+  --color-pine-50:  #f0faf1;
+  --color-pine-100: #d1f0d5;
+  --color-pine-200: #a3e0ab;
+  --color-pine-300: #5cc06a;
+  --color-pine-400: #2da33e;
+  --color-pine-500: #138426;
+  --color-pine-600: #0f6b1e;
+  --color-pine-700: #0b5417;
+
+  /* Softly palette */
+  --color-canvas:   #FDFCF8;
+  --color-sage:     #E8EFE8;
+  --color-lavender: #EFEDF4;
+  --color-dark:     #292524;
+  --color-muted:    #78716C;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FDFCF8;
+  color: #292524;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

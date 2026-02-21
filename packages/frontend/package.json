@@ -17,6 +17,8 @@
     "@hookform/resolvers": "^3.3.4",
     "@mealplanner/shared": "1.0.0",
     "axios": "^1.6.7",
+    "framer-motion": "^12.34.3",
+    "lucide-react": "^0.575.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
@@ -24,6 +26,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.0",
     "@testing-library/jest-dom": "^6.6.5",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
