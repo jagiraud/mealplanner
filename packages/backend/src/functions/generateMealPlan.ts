@@ -5,7 +5,7 @@ import {
   InvocationContext,
 } from '@azure/functions';
 import { ApiResponse, MealPlan } from '@mealplanner/shared/src/types';
-import { query } from '../services/db';
+import { query, transaction } from '../services/db';
 import { generateMealPlanSchema, validateInput } from '../services/validation';
 
 interface RecipeRow extends Record<string, unknown> {
@@ -160,7 +160,39 @@ export async function generateMealPlan(
       updatedAt: new Date(),
     };
 
-    // TODO: Persist meal plan to database
+    // Persist meal plan to database
+    await transaction(async (client) => {
+      // Insert meal plan
+      await client.query(
+        `INSERT INTO meal_plan (id, user_id, week_start, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          mealPlan.id,
+          mealPlan.userId,
+          mealPlan.weekStart,
+          mealPlan.createdAt,
+          mealPlan.updatedAt,
+        ]
+      );
+
+      // Insert meal plan days and their recipes
+      for (const day of mealPlan.days) {
+        const dayId = crypto.randomUUID();
+        await client.query(
+          `INSERT INTO meal_plan_day (id, meal_plan_id, date)
+           VALUES ($1, $2, $3)`,
+          [dayId, mealPlan.id, day.date]
+        );
+
+        for (const recipe of day.recipes) {
+          await client.query(
+            `INSERT INTO meal_plan_recipe (meal_plan_day_id, recipe_id, servings)
+             VALUES ($1, $2, $3)`,
+            [dayId, recipe.recipeId, recipe.servings]
+          );
+        }
+      }
+    });
 
     return {
       status: 200,

@@ -105,17 +105,21 @@ export interface Recipe {
   macronutrients: MacronutrientGoals;
   tags?: string[];
   imageUrl?: string;
+  sourceUrl?: string;
+  servings?: number;
+  recipeCategory?: string[];
   ratings?: RecipeRating[];
-  createdBy: string; // user id
+  createdBy?: string; // user id (null for crawled recipes)
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface RecipeIngredient {
-  ingredientId: string;
-  name: string;
-  quantity: number;
-  unit: string;
+  ingredientId?: string;
+  name?: string;
+  rawText?: string;
+  quantity?: number;
+  unit?: string;
 }
 
 export interface RecipeRating {

@@ -23,6 +23,8 @@ Review files for compliance with Web Interface Guidelines.
 Fetch fresh guidelines before each review:
 
 ```
+.claude/skills/web-design-guidelines/UI_DESIGN_GUIDELINE.md
+and 
 https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
 ```
 

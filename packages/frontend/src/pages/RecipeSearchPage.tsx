@@ -103,7 +103,7 @@ export default function RecipeSearchPage() {
             <label className={labelClass}>Recipe name</label>
             <input
               {...register('name')}
-              placeholder="e.g. chicken soup"
+              placeholder="t.ex. kycklinggryta"
               autoComplete="off"
               className={inputClass}
             />
@@ -112,7 +112,7 @@ export default function RecipeSearchPage() {
             <label className={labelClass}>Contains ingredient</label>
             <input
               {...register('ingredient')}
-              placeholder="e.g. garlic"
+              placeholder="t.ex. vitlök"
               autoComplete="off"
               className={inputClass}
             />

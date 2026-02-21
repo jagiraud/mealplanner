@@ -16,16 +16,21 @@ interface RecipeRow extends Record<string, unknown> {
   macronutrients: Record<string, unknown>;
   tags: string[];
   image_url: string | null;
-  created_by: string;
+  source_url: string | null;
+  servings: number | null;
+  recipe_category: string[] | null;
+  instructions: string[];
+  created_by: string | null;
   created_at: Date;
   updated_at: Date;
 }
 
 interface RecipeIngredientRow extends Record<string, unknown> {
-  ingredient_id: string;
-  name: string;
-  quantity: number;
-  unit: string;
+  ingredient_id: string | null;
+  name: string | null;
+  raw_text: string | null;
+  quantity: number | null;
+  unit: string | null;
 }
 
 export async function getRecipe(
@@ -62,9 +67,10 @@ export async function getRecipe(
 
     // Fetch recipe
     const recipeResult = await query<RecipeRow>(
-      `SELECT id, name, description, cooking_time_minutes, macronutrients, 
-              tags, image_url, created_by, created_at, updated_at
-       FROM recipe 
+      `SELECT id, name, description, cooking_time_minutes, macronutrients,
+              tags, image_url, source_url, servings, recipe_category,
+              instructions, created_by, created_at, updated_at
+       FROM recipe
        WHERE id = $1`,
       [recipeId]
     );
@@ -83,7 +89,7 @@ export async function getRecipe(
 
     // Fetch recipe ingredients
     const ingredientsResult = await query<RecipeIngredientRow>(
-      `SELECT ingredient_id, name, quantity, unit
+      `SELECT ingredient_id, name, raw_text, quantity, unit
        FROM recipe_ingredient
        WHERE recipe_id = $1`,
       [recipeId]
@@ -95,17 +101,21 @@ export async function getRecipe(
       name: recipeRow.name,
       description: recipeRow.description,
       ingredients: ingredientsResult.rows.map((ing) => ({
-        ingredientId: ing.ingredient_id,
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit,
+        ingredientId: ing.ingredient_id || undefined,
+        name: ing.name || undefined,
+        rawText: ing.raw_text || undefined,
+        quantity: ing.quantity || undefined,
+        unit: ing.unit || undefined,
       })),
-      instructions: [], // TODO: Add instructions field to schema
+      instructions: recipeRow.instructions || [],
       cookingTimeMinutes: recipeRow.cooking_time_minutes,
       macronutrients: recipeRow.macronutrients as Record<string, number>,
       tags: recipeRow.tags,
       imageUrl: recipeRow.image_url || undefined,
-      createdBy: recipeRow.created_by,
+      sourceUrl: recipeRow.source_url || undefined,
+      servings: recipeRow.servings || undefined,
+      recipeCategory: recipeRow.recipe_category || undefined,
+      createdBy: recipeRow.created_by || undefined,
       createdAt: recipeRow.created_at,
       updatedAt: recipeRow.updated_at,
     };

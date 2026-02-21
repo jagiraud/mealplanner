@@ -16,7 +16,10 @@ interface RecipeSearchRow extends Record<string, unknown> {
   macronutrients: Record<string, unknown>;
   tags: string[];
   image_url: string | null;
-  created_by: string;
+  source_url: string | null;
+  servings: number | null;
+  recipe_category: string[] | null;
+  created_by: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -80,9 +83,12 @@ export async function searchRecipes(
     let paramIndex = 1;
 
     if (filters.name) {
-      conditions.push(`r.name ILIKE $${paramIndex}`);
-      values.push(`%${filters.name}%`);
-      paramIndex++;
+      // Use trigram similarity for fuzzy Swedish text search, plus ILIKE fallback
+      conditions.push(
+        `(r.name ILIKE $${paramIndex} OR r.name % $${paramIndex + 1} OR r.description ILIKE $${paramIndex})`
+      );
+      values.push(`%${filters.name}%`, filters.name);
+      paramIndex += 2;
     }
 
     if (filters.maxCookingTime) {
@@ -100,9 +106,9 @@ export async function searchRecipes(
     if (filters.ingredient) {
       conditions.push(
         `EXISTS (
-          SELECT 1 FROM recipe_ingredient ri 
-          WHERE ri.recipe_id = r.id 
-          AND ri.name ILIKE $${paramIndex}
+          SELECT 1 FROM recipe_ingredient ri
+          WHERE ri.recipe_id = r.id
+          AND (ri.name ILIKE $${paramIndex} OR ri.raw_text ILIKE $${paramIndex})
         )`
       );
       values.push(`%${filters.ingredient}%`);
@@ -113,9 +119,9 @@ export async function searchRecipes(
       filters.excludeIngredients.forEach((ing) => {
         conditions.push(
           `NOT EXISTS (
-            SELECT 1 FROM recipe_ingredient ri 
-            WHERE ri.recipe_id = r.id 
-            AND ri.name ILIKE $${paramIndex}
+            SELECT 1 FROM recipe_ingredient ri
+            WHERE ri.recipe_id = r.id
+            AND (ri.name ILIKE $${paramIndex} OR ri.raw_text ILIKE $${paramIndex})
           )`
         );
         values.push(`%${ing}%`);
@@ -148,13 +154,20 @@ export async function searchRecipes(
     const offset = (page - 1) * limit;
     values.push(limit, offset);
 
+    // Use random order when browsing without filters, otherwise sort by relevance/date
+    const orderClause =
+      conditions.length === 0
+        ? 'ORDER BY RANDOM()'
+        : 'ORDER BY r.created_at DESC';
+
     const sqlQuery = `
-      SELECT r.id, r.name, r.description, r.cooking_time_minutes, 
-             r.macronutrients, r.tags, r.image_url, r.created_by, 
+      SELECT r.id, r.name, r.description, r.cooking_time_minutes,
+             r.macronutrients, r.tags, r.image_url, r.source_url,
+             r.servings, r.recipe_category, r.created_by,
              r.created_at, r.updated_at
       FROM recipe r
       ${whereClause}
-      ORDER BY r.created_at DESC
+      ${orderClause}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
@@ -171,7 +184,10 @@ export async function searchRecipes(
       macronutrients: row.macronutrients as Record<string, number>,
       tags: row.tags,
       imageUrl: row.image_url || undefined,
-      createdBy: row.created_by,
+      sourceUrl: row.source_url || undefined,
+      servings: row.servings || undefined,
+      recipeCategory: row.recipe_category || undefined,
+      createdBy: row.created_by || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }));

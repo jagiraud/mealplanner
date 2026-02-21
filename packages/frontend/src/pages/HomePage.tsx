@@ -1,6 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { UtensilsCrossed } from 'lucide-react';
+import type { Recipe } from '@mealplanner/shared';
+import { searchRecipes } from '../api/recipes';
+import RecipeCard from '../components/RecipeCard';
 
 const reveal = {
   hidden: { opacity: 0, y: 30 },
@@ -15,8 +19,30 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.15 } },
 };
 
+const gridVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.15 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: 'easeOut' },
+  },
+};
+
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
+  const [featuredRecipes, setFeaturedRecipes] = useState<Recipe[]>([]);
+
+  useEffect(() => {
+    searchRecipes({ limit: 6 })
+      .then((res) => {
+        if (res.success && res.data) setFeaturedRecipes(res.data);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div>
@@ -85,6 +111,58 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Featured recipes */}
+      {featuredRecipes.length > 0 && (
+        <motion.section
+          initial={shouldReduceMotion ? false : 'hidden'}
+          whileInView={shouldReduceMotion ? false : 'visible'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={stagger}
+          className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24"
+        >
+          <motion.h2
+            variants={shouldReduceMotion ? undefined : reveal}
+            className="text-3xl font-semibold tracking-tight text-stone-900 mb-2"
+          >
+            Popular recipes
+          </motion.h2>
+          <motion.p
+            variants={shouldReduceMotion ? undefined : reveal}
+            className="text-base text-stone-500 mb-10"
+          >
+            Discover what to cook this week.
+          </motion.p>
+
+          <motion.div
+            initial={shouldReduceMotion ? false : 'hidden'}
+            animate={shouldReduceMotion ? false : 'show'}
+            variants={gridVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {featuredRecipes.map((recipe) => (
+              <motion.div
+                key={recipe.id}
+                variants={shouldReduceMotion ? undefined : itemVariants}
+              >
+                <RecipeCard recipe={recipe} />
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            variants={shouldReduceMotion ? undefined : reveal}
+            className="text-center mt-10"
+          >
+            <Link
+              to="/recipes"
+              className="text-pine-600 font-medium hover:text-pine-700 transition-colors"
+            >
+              View all recipes &rarr;
+            </Link>
+          </motion.div>
+        </motion.section>
+      )}
 
       {/* Upcoming meals / empty state */}
       <motion.section
